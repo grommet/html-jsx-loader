@@ -5,9 +5,7 @@
 	"authors": [
 		"Alan Souza",
 		"Bryan Jacquot",
-		"Chris Carlozzi",
-		"Eric Soderberg",
-		"Jet Lim"
+		"Eric Soderberg"
 	],
 	"description": "html loader module to convert HTML to JSX for webpack",
 	"dependencies": {
