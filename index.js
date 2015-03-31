@@ -15,7 +15,6 @@
 */
 
 var HTMLtoJSX = require('htmltojsx');
-var loaderUtils = require('loader-utils');
 
 module.exports = function(content) {
 
