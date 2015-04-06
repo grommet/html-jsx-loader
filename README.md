@@ -34,3 +34,32 @@ Finally, you can reference this component in your JavaScript code as follows:
 
 	//Introduction is not HTML but ReactJS class.
 ```
+
+## Advanced Usage
+
+If you would like the **html-jsx-loader** to group tags into separate react components, use the query **group=true**:
+
+``` javascript
+{
+	...
+	module: { 
+		loaders: [
+			{ test: /\.htm$/, loader: 'jsx-loader!imports?React=react!html-jsx-loader?query=true'}
+		]},
+		resolve: {
+			extensions: ['', '.js', '.htm']
+		}
+	}
+	...
+}
+```
+
+Then you can refer to your components like this:
+
+``` javascript
+	var Introduction = require('./Introduction'); 
+	var Header = Introduction.Header;
+	var Section = Introduction.Section;
+	
+	//Section will contain all <section /> tags
+```

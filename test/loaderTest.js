@@ -23,4 +23,10 @@ describe("loader", function() {
 			'module.exports = React.createClass({\n  render: function() {\n    return (\n<div>Hello World!</div>\n);\n}\n});\n'
 		);
 	});
+
+	it("should convert to JSX and group items", function() {
+		loader.call({query: "?group=true",}, '<html><body><header>Hi Header!</header><section>Hi Section 1</section><section>Hi Section 2</section></body></html>').should.be.eql(
+			'module.exports = {\"Header\":\"React.createClass({\\n  render: function() {\\n    return (\\n<header>Hi Header!</header>\\n);\\n}\\n});\\n\",\"Section\":\"React.createClass({\\n  render: function() {\\n    return (\\n<div>\\n        <section>Hi Section 1</section><section>Hi Section 2</section>\\n      </div>\\n);\\n}\\n});\\n\"}'
+		);
+	});
 });
