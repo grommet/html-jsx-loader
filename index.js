@@ -15,6 +15,7 @@
 */
 
 var HTMLtoJSX = require('htmltojsx');
+var React = require('react');
 var loaderUtils = require('loader-utils');
 var jsdom = require('jsdom').jsdom;
 var window = jsdom().defaultView;
@@ -42,7 +43,7 @@ function createReactComponent(content) {
 		converter.convert(content),
 		');\n',
 		'}\n',
-		'});\n'
+		'})\n'
 	].join('');
 
 	return output;
@@ -78,19 +79,27 @@ module.exports = function(content) {
 		
 		var groupedElements = getGroupedElements(content);
 		
-		var reactGroups = {};
+		var tmp = '{';
+		var index = 0;
 		for (var key in groupedElements) {
 		  if (groupedElements.hasOwnProperty(key)) {
 		    var elements = groupedElements[key];
 
-			reactGroups[key.capitalize()] = createReactComponent(elements.join(''));
+			tmp += [key.capitalize(), ':', createReactComponent(elements.join(''))].join('');
+
+			if (index < Object.keys(groupedElements).length - 1) {
+				tmp += ',';
+			}
+
+			index++;
 		  }
 			
 		}
+		tmp += '}';
 		
-		output = JSON.stringify(reactGroups);
+		output = tmp;
 	} else {
-		output = createReactComponent(content);
+		output = createReactComponent(content) + ';';
 	}
 
 	return 'module.exports = ' + output;
