@@ -15,7 +15,6 @@
 */
 
 var HTMLtoJSX = require('htmltojsx');
-var React = require('react');
 var loaderUtils = require('loader-utils');
 var jsdom = require('jsdom').jsdom;
 var window = jsdom().defaultView;
