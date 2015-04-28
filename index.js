@@ -27,42 +27,54 @@ createElement = function(tag) {
   return window.document.createElement(tag);
 };
 
+function elementToRouter(element) {
+  var reactRouterTo = element.getAttribute('data-to');
+  if (reactRouterTo) {
+    reactRouterTo = 'to="' + element.getAttribute('data-to') + '"';
+    var reactRouterStyle = element.getAttribute('data-style') ?
+      ' style={' + element.getAttribute('data-style').replace('[', '{').replace(']', '}') + '}' : '';
+
+    var reactRouterActiveStyle = element.getAttribute('data-activestyle') ?
+      ' activeStyle={' + element.getAttribute('data-activestyle').replace('[', '{').replace(']', '}') + '}' : '';
+
+    var reactRouterParams = element.getAttribute('data-params') ?
+      ' params={' + element.getAttribute('data-params').replace('[', '{').replace(']', '}') + '}' : '';
+
+    var reactRouterQuery = element.getAttribute('data-query') ?
+      ' query={' + element.getAttribute('data-query').replace('[', '{').replace(']', '}') + '}' : '';
+
+    var routerAttributes = reactRouterTo + reactRouterStyle +
+      reactRouterActiveStyle + reactRouterParams + reactRouterQuery;
+
+    var linkString = '<Link ' + routerAttributes + '>' + element.innerHTML.replace('[', '{').replace(']', '}') + '</Link>';
+    return linkString;
+  } else {
+    var wrapper = createElement('div');
+    wrapper.appendChild(element);
+    return wrapper.innerHTML.replace(/(<img(?:[^>]*[^\/>])?)>/g, '$1/>').replace(/(<br)>/g, '$1/>');
+  }
+}
+
 function parseReactRouters(content) {
   var wrapperEl = createElement('div');
   wrapperEl.innerHTML = content;
-  var elements = wrapperEl.getElementsByTagName('*');
-
+  var elements = wrapperEl.children;
   var newContent = '';
-  for (var i = 0; i < elements.length; i++) {
-    var reactRouterTo = elements[i].getAttribute('data-to');
-    if (reactRouterTo) {
-      var element = elements[i];
+  for (var i = 0, im = elements.length; im > i; i++) {
+    var element = elements[0];
 
-      reactRouterTo = 'to="' + elements[i].getAttribute('data-to') + '"';
-      var reactRouterStyle = element.getAttribute('data-style') ?
-        ' style={' + element.getAttribute('data-style').replace('[', '{').replace(']', '}') + '}' : '';
-
-      var reactRouterActiveStyle = element.getAttribute('data-activestyle') ?
-        ' activeStyle={' + element.getAttribute('data-activestyle').replace('[', '{').replace(']', '}') + '}' : '';
-
-      var reactRouterParams = element.getAttribute('data-params') ?
-        ' params={' + element.getAttribute('data-params').replace('[', '{').replace(']', '}') + '}' : '';
-
-      var reactRouterQuery = element.getAttribute('data-query') ?
-        ' query={' + element.getAttribute('data-query').replace('[', '{').replace(']', '}') + '}' : '';
-
-      var routerAttributes = reactRouterTo + reactRouterStyle +
-        reactRouterActiveStyle + reactRouterParams + reactRouterQuery;
-
-      var linkString = '<Link ' + routerAttributes + '>' + elements[i].innerHTML.replace('[', '{').replace(']', '}') + '</Link>';
-      newContent += linkString;
+    if (element.children.length === 0) {
+    	newContent += elementToRouter(element);
     } else {
-      var wrapper = createElement('div');
-      wrapper.appendChild(elements[i]);
-      newContent += wrapper.innerHTML;
+    	newContent += parseReactRouters(element.innerHTML);
     }
   }
 
+  wrapperEl = createElement('div');
+  wrapperEl.innerHTML = newContent;
+  if (wrapperEl.children.length > 1) {
+  	return '<div>'+wrapperEl.innerHTML+'</div>';
+  }
   return newContent;
 }
 

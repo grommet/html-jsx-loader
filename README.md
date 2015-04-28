@@ -84,7 +84,7 @@ If you would like the **html-jsx-loader** to parse **a** tags to React Router **
 	...
 	module: { 
 		loaders: [
-			{ test: /\.htm$/, loader: 'jsx-loader!imports?React=react,Router=react-router, Link=>Router.Link!html-jsx-loader'}
+			{ test: /\.htm$/, loader: 'jsx-loader!imports?React=react,Router=react-router,Link=>Router.Link!html-jsx-loader'}
 		]},	
 		resolve: {
 			extensions: ['', '.js', '.htm']
