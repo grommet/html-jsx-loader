@@ -17,15 +17,15 @@
 var HTMLtoJSX = require('htmltojsx');
 var loaderUtils = require('loader-utils');
 var jsdom = require('jsdom').jsdom;
-var window = jsdom().defaultView;
+var defaultView = jsdom().defaultView;
 
 String.prototype.capitalize = function() {
   return this.charAt(0).toUpperCase() + this.slice(1).toLowerCase();
 };
 
-createElement = function(tag) {
-  return window.document.createElement(tag);
-};
+function createElement(tag) {
+  return defaultView.document.createElement(tag);
+}
 
 function elementToRouter(element) {
   var reactRouterTo = element.getAttribute('data-to');
@@ -55,26 +55,37 @@ function elementToRouter(element) {
   }
 }
 
-function parseReactRouters(content) {
-  var wrapperEl = createElement('div');
-  wrapperEl.innerHTML = content;
-  var elements = wrapperEl.children;
-  var newContent = '';
-  for (var i = 0, im = elements.length; im > i; i++) {
-    var element = elements[0];
+function isOnlyOneLevel(element) {
+  if (element.childNodes.length === 1) {
+    return true;
+  }
 
-    if (element.children.length === 0) {
-    	newContent += elementToRouter(element);
-    } else {
-    	newContent += parseReactRouters(element.innerHTML);
+  var elementCount = 0;
+  for (var i = 0, count = element.childNodes.length; i < count; i++) {
+    var child = element.childNodes[i];
+    if (child.nodeType === 1) {
+      if (elementCount > 1) {
+        return false;
+      } else {
+        elementCount++;
+      }
+    }
+  }
+  return true;
+}
+
+function parseReactRouters(element) {
+
+  var newContent = '';
+
+  if (isOnlyOneLevel(element)) {
+    newContent += elementToRouter(element);
+  } else {
+    for (var i = 0, count = element.childNodes.length; count > i; i++) {
+      newContent += parseReactRouters(element.childNodes[i]);
     }
   }
 
-  wrapperEl = createElement('div');
-  wrapperEl.innerHTML = newContent;
-  if (wrapperEl.children.length > 1) {
-  	return '<div>'+wrapperEl.innerHTML+'</div>';
-  }
   return newContent;
 }
 
@@ -83,6 +94,10 @@ function createReactComponent(content) {
     createClass: false
   });
 
+  var wrapperEl = createElement('div');
+  wrapperEl.innerHTML = converter.convert(content.trim());
+  var element = wrapperEl.children[0];
+
   var indent = '  ';
   var output = [
     'React.createClass({\n',
@@ -90,7 +105,7 @@ function createReactComponent(content) {
     'render: function() {\n',
     indent + indent,
     'return (\n',
-    parseReactRouters(converter.convert(content)),
+    parseReactRouters(element),
     ');\n',
     '}\n',
     '})\n'
