@@ -37,6 +37,8 @@ Finally, you can reference this component in your JavaScript code as follows:
 
 ## Advanced Usage
 
+### Grouping tags
+
 If you would like the **html-jsx-loader** to group tags into separate react components, use the query **group=true**:
 
 ``` javascript
@@ -63,3 +65,36 @@ Then you can refer to your components like this:
 	
 	//Section will contain all <section /> tags
 ```
+
+### React Router integration
+
+If you would like the **html-jsx-loader** to parse **<a/>** tags to React Router **<Link/>**, specify data-* inside your markup and the convertion will be done automatically:
+
+
+``` html
+<html>
+	<body>
+		<a data-style="[color: 'white']" data-activeStyle="[color: 'red']" to="user" params="[userId: user.id]" query="[foo: bar]">[user.name]</a>
+	</body>
+</html>
+```
+
+``` javascript
+{
+	...
+	module: { 
+		loaders: [
+			{ test: /\.htm$/, loader: 'jsx-loader!imports?React=react,Router=react-router, Link=>Router.Link!html-jsx-loader?query=true'}
+		]},
+		resolve: {
+			extensions: ['', '.js', '.htm']
+		}
+	}
+	...
+}
+```
+```
+
+The only required attribute is **data-to**. If not provided, the current tag will remain unchanged.
+
+

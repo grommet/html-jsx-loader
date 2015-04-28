@@ -20,13 +20,25 @@ var loader = require("../");
 describe("loader", function() {
 	it("should convert to JSX", function() {
 		loader.call({}, '<div>Hello World!</div>').should.be.eql(
-			'module.exports = React.createClass({\n  render: function() {\n    return (\n<div>Hello World!</div>\n);\n}\n})\n;'
+			'module.exports = React.createClass({\n  render: function() {\n    return (\n<div>Hello World!</div>);\n}\n})\n;'
 		);
 	});
 
 	it("should convert to JSX and group items", function() {
-		loader.call({query: "?group=true",}, '<html><body><header>Hi Header!</header><section>Hi Section 1</section><section>Hi Section 2</section></body></html>').should.be.eql(
-			'module.exports = {Header:React.createClass({\n  render: function() {\n    return (\n<header>Hi Header!</header>\n);\n}\n})\n,Section:React.createClass({\n  render: function() {\n    return (\n<div>\n        <section>Hi Section 1</section><section>Hi Section 2</section>\n      </div>\n);\n}\n})\n}'
+		loader.call({query: "?group=true"}, '<html><body><header>Hi Header!</header><section>Hi Section 1</section><section>Hi Section 2</section></body></html>').should.be.eql(
+			'module.exports = {Header:React.createClass({\n  render: function() {\n    return (\n<header>Hi Header!</header>);\n}\n})\n,Section:React.createClass({\n  render: function() {\n    return (\n<div>\n        <section>Hi Section 1</section><section>Hi Section 2</section>\n      </div>);\n}\n})\n};'
+		);
+	});
+
+	it("should convert to JSX using React Router simple", function() {
+		loader.call({}, '<html><body><a data-to="testing">[user.name]</a></body></html>').should.be.eql(
+			'module.exports = React.createClass({\n  render: function() {\n    return (\n<Link to=\"testing\">{user.name}</Link>);\n}\n})\n;'
+		);
+	});
+
+	it("should convert to JSX using React Router complete", function() {
+		loader.call({}, '<html><body><a data-style="[color: \'white\']" data-activeStyle="[color: \'red\']" data-params="[userId: user.id]" data-query="[foo:bar]" data-to="testing">Link Text</a></body></html>').should.be.eql(
+			"module.exports = React.createClass({\n  render: function() {\n    return (\n<Link to=\"testing\" style={{color: 'white'}} activeStyle={{color: 'red'}} params={{userId: user.id}} query={{foo:bar}}>Link Text</Link>);\n}\n})\n;"
 		);
 	});
 });

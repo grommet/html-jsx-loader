@@ -24,82 +24,121 @@ String.prototype.capitalize = function() {
 };
 
 createElement = function(tag) {
-	return window.document.createElement(tag);
+  return window.document.createElement(tag);
 };
 
+function parseReactRouters(content) {
+  var wrapperEl = createElement('div');
+  wrapperEl.innerHTML = content;
+  var elements = wrapperEl.getElementsByTagName('*');
+
+  var newContent = '';
+  for (var i = 0; i < elements.length; i++) {
+    var reactRouterTo = elements[i].getAttribute('data-to');
+    if (reactRouterTo) {
+      var element = elements[i];
+
+      reactRouterTo = 'to="' + elements[i].getAttribute('data-to') + '"';
+      var reactRouterStyle = element.getAttribute('data-style') ?
+        ' style={' + element.getAttribute('data-style').replace('[', '{').replace(']', '}') + '}' : '';
+
+      var reactRouterActiveStyle = element.getAttribute('data-activestyle') ?
+        ' activeStyle={' + element.getAttribute('data-activestyle').replace('[', '{').replace(']', '}') + '}' : '';
+
+      var reactRouterParams = element.getAttribute('data-params') ?
+        ' params={' + element.getAttribute('data-params').replace('[', '{').replace(']', '}') + '}' : '';
+
+      var reactRouterQuery = element.getAttribute('data-query') ?
+        ' query={' + element.getAttribute('data-query').replace('[', '{').replace(']', '}') + '}' : '';
+
+      var routerAttributes = reactRouterTo + reactRouterStyle +
+        reactRouterActiveStyle + reactRouterParams + reactRouterQuery;
+
+      var linkString = '<Link ' + routerAttributes + '>' + elements[i].innerHTML.replace('[', '{').replace(']', '}') + '</Link>';
+      newContent += linkString;
+    } else {
+      var wrapper = createElement('div');
+      wrapper.appendChild(elements[i]);
+      newContent += wrapper.innerHTML;
+    }
+  }
+
+  return newContent;
+}
+
 function createReactComponent(content) {
-	var converter = new HTMLtoJSX({
-	  createClass: false
-	});
+  var converter = new HTMLtoJSX({
+    createClass: false
+  });
 
-	var indent = '  ';
-	var output = [
-		'React.createClass({\n',
-		indent,
-		'render: function() {\n',
-		indent + indent,
-		'return (\n',
-		converter.convert(content),
-		');\n',
-		'}\n',
-		'})\n'
-	].join('');
+  var indent = '  ';
+  var output = [
+    'React.createClass({\n',
+    indent,
+    'render: function() {\n',
+    indent + indent,
+    'return (\n',
+    parseReactRouters(converter.convert(content)),
+    ');\n',
+    '}\n',
+    '})\n'
+  ].join('');
 
-	return output;
+  return output;
 }
 
 function getGroupedElements(content) {
-	var wrapperEl = createElement('div');
-	wrapperEl.innerHTML = content;
-	var elements = wrapperEl.getElementsByTagName('*');
+  var wrapperEl = createElement('div');
+  wrapperEl.innerHTML = content;
+  var elements = wrapperEl.getElementsByTagName('*');
 
-	var groupedElements = {};
-	for (var i = 0; i < elements.length;) {
-	  var wrapper = createElement('div');
-	  wrapper.appendChild(elements[i]);
-	  var tag = elements[i].tagName;
-	  if (groupedElements[tag]) {
-	  	groupedElements[tag].push(wrapper.innerHTML);
-	  } else {
-	  	groupedElements[tag] = [wrapper.innerHTML];
-	  }
-	}
+  var groupedElements = {};
+  for (var i = 0; i < elements.length;) {
+    var wrapper = createElement('div');
+    wrapper.appendChild(elements[i]);
+    var tag = elements[i].tagName;
+    if (groupedElements[tag]) {
+      groupedElements[tag].push(wrapper.innerHTML);
+    } else {
+      groupedElements[tag] = [wrapper.innerHTML];
+    }
+  }
 
-	return groupedElements;
+  return groupedElements;
 }
 
 module.exports = function(content) {
 
-	var query = loaderUtils.parseQuery(this.query);
+  var query = loaderUtils.parseQuery(this.query);
 
-	var output;
+  var output;
 
-	if (query.group) {
-		
-		var groupedElements = getGroupedElements(content);
-		
-		var tmp = '{';
-		var index = 0;
-		for (var key in groupedElements) {
-		  if (groupedElements.hasOwnProperty(key)) {
-		    var elements = groupedElements[key];
+  if (query.group) {
 
-			tmp += [key.capitalize(), ':', createReactComponent(elements.join(''))].join('');
+    var groupedElements = getGroupedElements(content);
 
-			if (index < Object.keys(groupedElements).length - 1) {
-				tmp += ',';
-			}
+    var tmp = '{';
+    var index = 0;
+    for (var key in groupedElements) {
+      if (groupedElements.hasOwnProperty(key)) {
+        var elements = groupedElements[key];
 
-			index++;
-		  }
-			
-		}
-		tmp += '}';
-		
-		output = tmp;
-	} else {
-		output = createReactComponent(content) + ';';
-	}
+        tmp += [key.capitalize(), ':', createReactComponent(elements.join(''))].join('');
 
-	return 'module.exports = ' + output;
+        if (index < Object.keys(groupedElements).length - 1) {
+          tmp += ',';
+        }
+
+        index++;
+      }
+
+    }
+    tmp += '};';
+
+    output = tmp;
+  } else {
+    output = createReactComponent(content) + ';';
+  }
+
+  return 'module.exports = ' + output;
 };
