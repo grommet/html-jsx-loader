@@ -68,7 +68,7 @@ Then you can refer to your components like this:
 
 ### React Router integration
 
-If you would like the **html-jsx-loader** to parse **a** tags to React Router **Link** tags, specify data-* inside your markup and the convertion will be done automatically:
+If you would like the **html-jsx-loader** to parse **a** tags to React Router **Link** tags, specify data-* inside your markup and the conversion will be done automatically:
 
 
 ``` html
@@ -94,6 +94,6 @@ If you would like the **html-jsx-loader** to parse **a** tags to React Router **
 }
 ```
 
-The only required attribute is **data-to**. If not provided, the current tag will remain unchanged.
+The only required attribute is **data-to**. If not provided, the current **a** tag will remain unchanged.
 
 
