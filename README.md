@@ -74,7 +74,7 @@ If you would like the **html-jsx-loader** to parse **a** tags to React Router **
 ``` html
 <html>
 	<body>
-		<a data-style="[color: 'white']" data-activeStyle="[color: 'red']" to="user" params="[userId: user.id]" query="[foo: bar]">[user.name]</a>
+		<a data-style="[color: 'white']" data-activeStyle="[color: 'red']" data-to="user" data-params="[userId: user.id]" data-query="[foo: bar]">[user.name]</a>
 	</body>
 </html>
 ```
