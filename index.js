@@ -27,76 +27,115 @@ function createElement(tag) {
   return defaultView.document.createElement(tag);
 }
 
-function elementToRouter(element) {
-  var reactRouterTo = element.getAttribute('data-to');
-  if (reactRouterTo) {
-    reactRouterTo = 'to="' + element.getAttribute('data-to') + '"';
-    var reactRouterStyle = element.getAttribute('data-style') ?
-      ' style={' + element.getAttribute('data-style').replace('[', '{').replace(']', '}') + '}' : '';
+var TagToReactRouter = function() {
 
-    var reactRouterActiveStyle = element.getAttribute('data-activestyle') ?
-      ' activeStyle={' + element.getAttribute('data-activestyle').replace('[', '{').replace(']', '}') + '}' : '';
+  return {
+    reset: function() {
+      this.output = '';
 
-    var reactRouterParams = element.getAttribute('data-params') ?
-      ' params={' + element.getAttribute('data-params').replace('[', '{').replace(']', '}') + '}' : '';
+      this.routerLink = false;
+    },
 
-    var reactRouterQuery = element.getAttribute('data-query') ?
-      ' query={' + element.getAttribute('data-query').replace('[', '{').replace(']', '}') + '}' : '';
+    parse: function(element) {
 
-    var routerAttributes = reactRouterTo + reactRouterStyle +
-      reactRouterActiveStyle + reactRouterParams + reactRouterQuery;
+      this.reset();
 
-    var linkString = '<Link ' + routerAttributes + '>' + element.innerHTML.replace('[', '{').replace(']', '}') + '</Link>';
-    return linkString;
-  } else {
-    var wrapper = createElement('div');
-    wrapper.appendChild(element);
-    return wrapper.innerHTML.replace(/(<img(?:[^>]*[^\/>])?)>/g, '$1/>').replace(/(<br)>/g, '$1/>');
-  }
-}
+      var wrapper = createElement('div');
+      wrapper.innerHTML = element;
 
-function isOnlyOneLevel(element) {
-  if (element.childNodes.length === 1) {
-    return true;
-  }
+      var jsxDiv = wrapper.children[0];
 
-  var elementCount = 0;
-  for (var i = 0, count = element.childNodes.length; i < count; i++) {
-    var child = element.childNodes[i];
-    if (child.nodeType === 1) {
-      if (elementCount > 1) {
-        return false;
-      } else {
-        elementCount++;
+      this.visit(jsxDiv);
+
+      return this.output;
+    },
+
+    traverse: function(element) {
+      for (var i = 0, count = element.childNodes.length; i < count; i++) {
+        this.visit(element.childNodes[i]);
+      }
+    },
+
+    visit: function(element) {
+      this.begin(element);
+      this.traverse(element);
+      this.end(element);
+    },
+
+    handleText: function(element) {
+      var text = element.textContent;
+      if (this.routerLink) {
+        text = text.replace("[", '{').replace(/]/g, '}');
+      }
+
+      var tempEl = createElement('div');
+      tempEl.textContent = text;
+      
+      this.output += tempEl.innerHTML;
+    },
+
+    beginNode: function(node) {
+
+      var tagName = this.routerLink ? 'Link' : node.tagName.toLowerCase();
+      var attributes = [];
+      for (var i = 0, count = node.attributes.length; i < count; i++) {
+        var value = node.attributes[i].value;
+        if (value.indexOf('[') !== 0) {
+          value = '"' + value + '"';
+        } else {
+        	value = '{' + value.replace(/\[/g, '{').replace(/\]/g,'}') + '}';
+        }
+
+        var name = node.attributes[i].name;
+        if (this.routerLink) {
+          name = name.replace(/data-/g, '');
+        }
+
+        attributes.push(name + '=' + value); //FORMAT FOR LINK
+      }
+
+      this.output += '<' + tagName;
+      if (attributes.length > 0) {
+        this.output += ' ' + attributes.join(' ');
+      }
+      if (node.firstChild) {
+        this.output += '>';
+      }
+    },
+
+    begin: function(node) {
+      switch (node.nodeType) {
+        case 1:
+          if (node.tagName === 'A' && node.getAttribute('data-to')) {
+            this.routerLink = true;
+          }
+          this.beginNode(node);
+          break;
+
+        case 3:
+          this.handleText(node);
+          break;
+      }
+    },
+
+    end: function(node) {
+      if (node.nodeType === 1) {
+        var tagName = this.routerLink ? 'Link' : node.tagName.toLowerCase();
+        this.routerLink = false;
+        if (node.firstChild) {
+          this.output += '</' + tagName + '>';
+        } else {
+          this.output += ' />';
+        }
       }
     }
-  }
-  return true;
-}
-
-function parseReactRouters(element) {
-
-  var newContent = '';
-
-  if (isOnlyOneLevel(element)) {
-    newContent += elementToRouter(element);
-  } else {
-    for (var i = 0, count = element.childNodes.length; count > i; i++) {
-      newContent += parseReactRouters(element.childNodes[i]);
-    }
-  }
-
-  return newContent;
-}
+  };
+};
 
 function createReactComponent(content) {
   var converter = new HTMLtoJSX({
     createClass: false
   });
-
-  var wrapperEl = createElement('div');
-  wrapperEl.innerHTML = converter.convert(content.trim());
-  var element = wrapperEl.children[0];
 
   var indent = '  ';
   var output = [
@@ -105,7 +144,7 @@ function createReactComponent(content) {
     'render: function() {\n',
     indent + indent,
     'return (\n',
-    parseReactRouters(element),
+    new TagToReactRouter().parse(converter.convert(content)),
     ');\n',
     '}\n',
     '})\n'

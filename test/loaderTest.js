@@ -25,32 +25,44 @@ describe("loader", function() {
 	});
 
 	it("should convert to JSX and group items", function() {
-		loader.call({query: "?group=true"}, '<header>Hi Header!</header><section>h1</section><section>h2</section>').should.be.eql(
-			'module.exports = {Header:React.createClass({\n  render: function() {\n    return (\n<header>Hi Header!</header>);\n}\n})\n,Section:React.createClass({\n  render: function() {\n    return (\n<div>\n        <section>h1</section><section>h2</section>\n      </div>);\n}\n})\n};'
+		loader.call({query: "?group=true"}, '<header>Hi Header!</header><section><a>Sample</a><h2>Testing</h2><img src=\"img/path_1.jpg\"/></section><section><a>Sample 2</a><h2>Testing 2</h2><img src=\"img/path_2.jpg\"/></section>').should.be.eql(
+			'module.exports = {Header:React.createClass({\n  render: function() {\n    return (\n<header>Hi Header!</header>);\n}\n})\n,Section:React.createClass({\n  render: function() {\n    return (\n<div>\n        <section><a>Sample</a><h2>Testing</h2><img src=\"img/path_1.jpg\" /></section><section><a>Sample 2</a><h2>Testing 2</h2><img src=\"img/path_2.jpg\" /></section>\n      </div>);\n}\n})\n};'
 		);
 	});
 
 	it("should parse images properly", function() {
 		loader.call({query: "?group=true"}, '<section><img src="img/path_1.jpg" /></section><section><img src="img/path_2.jpg" /></section>').should.be.eql(
-			'module.exports = {Section:React.createClass({\n  render: function() {\n    return (\n<div>\n        <section><img src=\"img/path_1.jpg\"/></section><section><img src=\"img/path_2.jpg\"/></section>\n      </div>);\n}\n})\n};'
+			'module.exports = {Section:React.createClass({\n  render: function() {\n    return (\n<div>\n        <section><img src=\"img/path_1.jpg\" /></section><section><img src=\"img/path_2.jpg\" /></section>\n      </div>);\n}\n})\n};'
 		);
 	});
 
 	it("should parse br properly", function() {
 		loader.call({}, '<section><br /> Testing!</section>').should.be.eql(
-			'module.exports = React.createClass({\n  render: function() {\n    return (\n<section><br/> Testing!</section>);\n}\n})\n;'
+			'module.exports = React.createClass({\n  render: function() {\n    return (\n<section><br /> Testing!</section>);\n}\n})\n;'
 		);
 	});
 
 	it("should convert to JSX using React Router simple", function() {
-		loader.call({}, '<html><body><a data-to="testing">[user.name]</a></body></html>').should.be.eql(
+		loader.call({}, '<!DOCTYPE html><html><body><a data-to="testing">[user.name]</a></body></html>').should.be.eql(
 			'module.exports = React.createClass({\n  render: function() {\n    return (\n<Link to=\"testing\">{user.name}</Link>);\n}\n})\n;'
 		);
 	});
 
 	it("should convert to JSX using React Router complete", function() {
 		loader.call({}, '<html><body><a data-style="[color: \'white\']" data-activeStyle="[color: \'red\']" data-params="[userId: user.id]" data-query="[foo:bar]" data-to="testing">Link Text</a></body></html>').should.be.eql(
-			"module.exports = React.createClass({\n  render: function() {\n    return (\n<Link to=\"testing\" style={{color: 'white'}} activeStyle={{color: 'red'}} params={{userId: user.id}} query={{foo:bar}}>Link Text</Link>);\n}\n})\n;"
+			"module.exports = React.createClass({\n  render: function() {\n    return (\n<Link style={{color: 'white'}} activestyle={{color: 'red'}} params={{userId: user.id}} query={{foo:bar}} to=\"testing\">Link Text</Link>);\n}\n})\n;"
+		);
+	});
+
+	it("should not parse to react router using generic links", function() {
+		loader.call({}, '<html><body><a data-to="testing">[user.name]</a><a href="testing">testing</a></body></html>').should.be.eql(
+			"module.exports = React.createClass({\n  render: function() {\n    return (\n<div>\n        <Link to=\"testing\">{user.name}</Link><a href=\"testing\">testing</a>\n      </div>);\n}\n})\n;"
+		);
+	});
+
+	it("should work with pre code elements", function() {
+		loader.call({}, '<pre><code>&lt;!DOCTYPE html&gt;</code></pre>').should.be.eql(
+			"module.exports = React.createClass({\n  render: function() {\n    return (\n<pre><code>&lt;!DOCTYPE html&gt;</code></pre>);\n}\n})\n;"
 		);
 	});
 });
