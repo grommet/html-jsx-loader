@@ -46,7 +46,7 @@ If you would like the **html-jsx-loader** to group tags into separate react comp
 	...
 	module: { 
 		loaders: [
-			{ test: /\.htm$/, loader: 'jsx-loader!imports?React=react!html-jsx-loader?query=true'}
+			{ test: /\.htm$/, loader: 'jsx-loader!imports?React=react!html-jsx-loader?group=true'}
 		]},
 		resolve: {
 			extensions: ['', '.js', '.htm']
