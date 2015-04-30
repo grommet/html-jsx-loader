@@ -50,7 +50,7 @@ describe("loader", function() {
 
 	it("should convert to JSX using React Router complete", function() {
 		loader.call({}, '<html><body><a data-style="[color: \'white\']" data-activeStyle="[color: \'red\']" data-params="[userId: user.id]" data-query="[foo:bar]" data-to="testing">Link Text</a></body></html>').should.be.eql(
-			"module.exports = React.createClass({\n  render: function() {\n    return (\n<Link style={{color: 'white'}} activestyle={{color: 'red'}} params={{userId: user.id}} query={{foo:bar}} to=\"testing\">Link Text</Link>);\n}\n})\n;"
+			"module.exports = React.createClass({\n  render: function() {\n    return (\n<Link style={{color: 'white'}} activeStyle={{color: 'red'}} params={{userId: user.id}} query={{foo:bar}} to=\"testing\">Link Text</Link>);\n}\n})\n;"
 		);
 	});
 
@@ -63,6 +63,12 @@ describe("loader", function() {
 	it("should work with pre code elements", function() {
 		loader.call({}, '<pre><code>&lt;!DOCTYPE html&gt;</code></pre>').should.be.eql(
 			"module.exports = React.createClass({\n  render: function() {\n    return (\n<pre><code>&lt;!DOCTYPE html&gt;</code></pre>);\n}\n})\n;"
+		);
+	});
+
+	it("should not remove class attribute from a tag", function() {
+		loader.call({}, '<a href="testing" class="testing2">Hi</a><a href="testing">testing</a>').should.be.eql(
+			"module.exports = React.createClass({\n  render: function() {\n    return (\n<div>\n        <a href=\"testing\" className=\"testing2\">Hi</a><a href=\"testing\">testing</a>\n      </div>);\n}\n})\n;"
 		);
 	});
 });

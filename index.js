@@ -27,6 +27,12 @@ function createElement(tag) {
   return defaultView.document.createElement(tag);
 }
 
+var ATTRIBUTE_MAPPING = {
+	'classname': 'className',
+	'activestyle': 'activeStyle',
+	'htmlfor': 'htmlFor'
+};
+
 var TagToReactRouter = function() {
 
   return {
@@ -91,7 +97,12 @@ var TagToReactRouter = function() {
           name = name.replace(/data-/g, '');
         }
 
-        attributes.push(name + '=' + value); //FORMAT FOR LINK
+        for (var key in ATTRIBUTE_MAPPING) {
+        	if (ATTRIBUTE_MAPPING.hasOwnProperty(key)) {
+        		name = name.replace(key, ATTRIBUTE_MAPPING[key]);
+        	}
+        }
+        attributes.push(name + '=' + value);
       }
 
       this.output += '<' + tagName;
