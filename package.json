@@ -1,6 +1,6 @@
 {
 	"name": "html-jsx-loader",
-	"version": "0.1.10",
+	"version": "0.1.11",
 	"repository": "https://github.com/HewlettPackard/html-jsx-loader.git",
 	"authors": [
 		"Alan Souza",
@@ -10,7 +10,7 @@
 	"description": "html loader module to convert HTML to JSX for webpack",
 	"dependencies": {
 		"loader-utils": "^0.2.6",
-		"htmltojsx": "^0.2.1",
+		"htmltojsx": "https://github.com/alansouzati/react-magic.git",
 		"jsdom": "~4.4.0"
 	},
 	"devDependencies": {
