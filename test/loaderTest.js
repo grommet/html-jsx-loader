@@ -36,6 +36,18 @@ describe("loader", function() {
 		);
 	});
 
+  it("should replace variables if query is provided", function() {
+    loader.call({query: "?__TESTING__=blah"}, '<section><img src="__TESTING__/path_1.jpg" /></section><section><img src="img/path_2.jpg" /></section>').should.be.eql(
+      'module.exports = React.createClass({\n  render: function() {\n    return (\n<div>\n        <section><img src=\"blah/path_1.jpg\" /></section><section><img src=\"img/path_2.jpg\" /></section>\n      </div>);\n}\n})\n;'
+    );
+  });
+
+  it("should not replace variables if query is not provided", function() {
+    loader.call({}, '<section><img src="__TESTING__/path_1.jpg" /></section><section><img src="img/path_2.jpg" /></section>').should.be.eql(
+      'module.exports = React.createClass({\n  render: function() {\n    return (\n<div>\n        <section><img src=\"__TESTING__/path_1.jpg\" /></section><section><img src=\"img/path_2.jpg\" /></section>\n      </div>);\n}\n})\n;'
+    );
+  });
+
 	it("should parse br properly", function() {
 		loader.call({}, '<section><br /> Testing!</section>').should.be.eql(
 			'module.exports = React.createClass({\n  render: function() {\n    return (\n<section><br /> Testing!</section>);\n}\n})\n;'

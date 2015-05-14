@@ -13,7 +13,7 @@ Add the **html-jsx-loader** to your Webpack configuration:
 ``` javascript
 {
 	...
-	module: { 
+	module: {
 		loaders: [
 			{ test: /\.htm$/, loader: 'jsx-loader!imports?React=react!html-jsx-loader'}
 		]},
@@ -44,7 +44,7 @@ If you would like the **html-jsx-loader** to group tags into separate react comp
 ``` javascript
 {
 	...
-	module: { 
+	module: {
 		loaders: [
 			{ test: /\.htm$/, loader: 'jsx-loader!imports?React=react!html-jsx-loader?group=true'}
 		]},
@@ -59,10 +59,10 @@ If you would like the **html-jsx-loader** to group tags into separate react comp
 Then you can refer to your components like this:
 
 ``` javascript
-	var Introduction = require('./Introduction'); 
+	var Introduction = require('./Introduction');
 	var Header = Introduction.Header;
 	var Section = Introduction.Section;
-	
+
 	//Section will contain all <section /> tags
 ```
 
@@ -82,10 +82,10 @@ If you would like the **html-jsx-loader** to parse **a** tags to React Router **
 ``` javascript
 {
 	...
-	module: { 
+	module: {
 		loaders: [
 			{ test: /\.htm$/, loader: 'jsx-loader!imports?React=react,Router=react-router,Link=>Router.Link!html-jsx-loader'}
-		]},	
+		]},
 		resolve: {
 			extensions: ['', '.js', '.htm']
 		}
@@ -96,4 +96,32 @@ If you would like the **html-jsx-loader** to parse **a** tags to React Router **
 
 The only required attribute is **data-to**. If not provided, the current **a** tag will remain unchanged.
 
+### Variable Replacement
+
+If you would like the **html-jsx-loader** to replace a custom variable inside your HTML, create a variable in the format of '__VARIABLE_NAME__' and add the desired replacement value as a query attribute to the loader. For Example:
+
+``` html
+<html>
+  <body>
+    <img src"__LOCATION__/image.png" />
+  </body>
+</html>
+```
+
+``` javascript
+{
+  ...
+  module: {
+    loaders: [
+      { test: /\.htm$/, loader: 'jsx-loader!imports?React=react!html-jsx-loader?__LOCATION__=server'}
+    ]},
+    resolve: {
+      extensions: ['', '.js', '.htm']
+    }
+  }
+  ...
+}
+```
+
+Then, the expect **src** path of the image tag will be: 'server/image.png'. If the query is not specified the corresponding variable in the HTML will not change.
 

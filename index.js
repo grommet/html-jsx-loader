@@ -28,9 +28,9 @@ function createElement(tag) {
 }
 
 var ATTRIBUTE_MAPPING = {
-	'classname': 'className',
-	'activestyle': 'activeStyle',
-	'htmlfor': 'htmlFor'
+  'classname': 'className',
+  'activestyle': 'activeStyle',
+  'htmlfor': 'htmlFor'
 };
 
 var TagToReactRouter = function() {
@@ -76,7 +76,7 @@ var TagToReactRouter = function() {
 
       var tempEl = createElement('div');
       tempEl.textContent = text;
-      
+
       this.output += tempEl.innerHTML;
     },
 
@@ -89,7 +89,7 @@ var TagToReactRouter = function() {
         if (value.indexOf('[') !== 0) {
           value = '"' + value + '"';
         } else {
-        	value = '{' + value.replace(/\[/g, '{').replace(/\]/g,'}') + '}';
+          value = '{' + value.replace(/\[/g, '{').replace(/\]/g,'}') + '}';
         }
 
         var name = node.attributes[i].name;
@@ -98,9 +98,9 @@ var TagToReactRouter = function() {
         }
 
         for (var key in ATTRIBUTE_MAPPING) {
-        	if (ATTRIBUTE_MAPPING.hasOwnProperty(key)) {
-        		name = name.replace(key, ATTRIBUTE_MAPPING[key]);
-        	}
+          if (ATTRIBUTE_MAPPING.hasOwnProperty(key)) {
+            name = name.replace(key, ATTRIBUTE_MAPPING[key]);
+          }
         }
         attributes.push(name + '=' + value);
       }
@@ -184,9 +184,27 @@ function getGroupedElements(content) {
   return groupedElements;
 }
 
+function replaceVariables(content, query) {
+
+  var newContent = content;
+  for (var key in query) {
+    if (query.hasOwnProperty(key)) {
+      if (key.indexOf('__') === 0) {
+        var re = new RegExp(key, 'g');
+        newContent = newContent.replace(re, query[key]);
+      }
+    }
+  }
+
+  return newContent;
+
+}
+
 module.exports = function(content) {
 
   var query = loaderUtils.parseQuery(this.query);
+
+  content = replaceVariables(content, query);
 
   var output;
 
