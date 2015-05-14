@@ -98,7 +98,7 @@ The only required attribute is **data-to**. If not provided, the current **a** t
 
 ### Variable Replacement
 
-If you would like the **html-jsx-loader** to replace a custom variable inside your HTML, create a variable in the format of __VARIABLE_NAME__ and add the desired replacement value as a query attribute to the loader. For Example:
+If you would like the **html-jsx-loader** to replace a custom variable inside your HTML, create a variable in the format of \_\_VARIABLE_NAME\_\_ and add the desired replacement value as a query attribute to the loader. For Example:
 
 ``` html
 <html>
