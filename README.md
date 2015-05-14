@@ -98,7 +98,7 @@ The only required attribute is **data-to**. If not provided, the current **a** t
 
 ### Variable Replacement
 
-If you would like the **html-jsx-loader** to replace a custom variable inside your HTML, create a variable in the format of '__VARIABLE_NAME__' and add the desired replacement value as a query attribute to the loader. For Example:
+If you would like the **html-jsx-loader** to replace a custom variable inside your HTML, create a variable in the format of __VARIABLE_NAME__ and add the desired replacement value as a query attribute to the loader. For Example:
 
 ``` html
 <html>
@@ -123,5 +123,5 @@ If you would like the **html-jsx-loader** to replace a custom variable inside yo
 }
 ```
 
-Then, the expect **src** path of the image tag will be: 'server/image.png'. If the query is not specified the corresponding variable in the HTML will not change.
+Then, the expected **src** path of the image tag will be: 'server/image.png'. If the query is not specified the corresponding variable in the HTML will not change.
 
