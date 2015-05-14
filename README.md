@@ -123,5 +123,5 @@ If you would like the **html-jsx-loader** to replace a custom variable inside yo
 }
 ```
 
-Then, the expected **src** path of the image tag will be: 'server/image.png'. If the query is not specified the corresponding variable in the HTML will not change.
+Then, the expected **src** path of the image tag will be: 'server/image.png'. If the query is not specified, the corresponding variable in the HTML will not change.
 
