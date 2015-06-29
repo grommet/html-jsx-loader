@@ -16,7 +16,7 @@
 
 var HTMLtoJSX = require('htmltojsx');
 var loaderUtils = require('loader-utils');
-var jsdom = require('jsdom').jsdom;
+var jsdom = require('jsdom-no-contextify').jsdom;
 var defaultView = jsdom().defaultView;
 
 String.prototype.capitalize = function() {
