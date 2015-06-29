@@ -11,7 +11,7 @@
 	"dependencies": {
 		"loader-utils": "^0.2.6",
 		"htmltojsx": "^0.2.2",
-		"jsdom": "~3.1.2"
+		"jsdom-no-contextify": "~3.1.0"
 	},
 	"devDependencies": {
 		"mocha": "1.17.x",
