@@ -27,6 +27,10 @@ function createElement(tag) {
   return defaultView.document.createElement(tag);
 }
 
+function isEmpty(string) {
+   return !/[^\s]/.test(string);
+}
+
 var ATTRIBUTE_MAPPING = {
   'classname': 'className',
   'activestyle': 'activeStyle',
@@ -42,6 +46,36 @@ var TagToReactRouter = function() {
       this.routerLink = false;
     },
 
+    oneLevelOnly: function(element) {
+
+      //based on https://github.com/reactjs/react-magic/blob/master/src/htmltojsx.js#L253
+      // Only a single child element
+      if (
+        element.childNodes.length === 1
+        && element.childNodes[0].nodeType === 1
+      ) {
+        return true;
+      }
+      // Only one element, and all other children are whitespace
+      var foundElement = false;
+      for (var i = 0, count = element.childNodes.length; i < count; i++) {
+        var child = element.childNodes[i];
+        if (child.nodeType === 1) {
+          if (foundElement) {
+            // Encountered an element after already encountering another one
+            // Therefore, more than one element at root level
+            return false;
+          } else {
+            foundElement = true;
+          }
+        } else if (child.nodeType === 3 && !isEmpty(child.textContent)) {
+          // Contains text content
+          return false;
+        }
+      }
+      return true;
+    },
+
     parse: function(element) {
 
       this.reset();
@@ -49,9 +83,11 @@ var TagToReactRouter = function() {
       var wrapper = createElement('div');
       wrapper.innerHTML = element;
 
-      var jsxDiv = wrapper.children[0];
-
-      this.visit(jsxDiv);
+      if (this.oneLevelOnly(wrapper)) {
+        this.traverse(wrapper);
+      } else {
+        this.visit(wrapper);
+      }
 
       return this.output;
     },
@@ -71,7 +107,7 @@ var TagToReactRouter = function() {
     handleText: function(element) {
       var text = element.textContent;
       if (this.routerLink) {
-        text = text.replace("[", '{').replace(/]/g, '}');
+        text = text.replace(/\[/g, '{').replace(/]/g, '}');
       }
 
       var tempEl = createElement('div');
@@ -86,10 +122,10 @@ var TagToReactRouter = function() {
       var attributes = [];
       for (var i = 0, count = node.attributes.length; i < count; i++) {
         var value = node.attributes[i].value;
-        if (value.indexOf('[') !== 0) {
+        if (value.indexOf('[') === -1) {
           value = '"' + value + '"';
         } else {
-          value = '{' + value.replace(/\[/g, '{').replace(/\]/g,'}') + '}';
+          value = '{' + value.replace(/\[/g, '{').replace(/\]/g, '}') + '}';
         }
 
         var name = node.attributes[i].name;
@@ -155,7 +191,7 @@ function createReactComponent(content) {
     'render: function() {\n',
     indent + indent,
     'return (\n',
-    new TagToReactRouter().parse(converter.convert(content)),
+      converter.convert(new TagToReactRouter().parse(content)),
     ');\n',
     '}\n',
     '})\n'
